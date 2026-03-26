@@ -70,10 +70,40 @@
     pointer-events:none;
   }
 
+  /* ─── FAIXA DE OLHOS ─── */
+  .eyes-band {
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    margin-top: -1rem;
+    animation: fadeUp 1.3s ease both;
+    animation-delay: 0.1s;
+    overflow: hidden;
+  }
+
+  .eye-svg {
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 8px rgba(224,48,48,0.7));
+    animation: eyeblink 3.5s ease-in-out infinite;
+  }
+
+  .eye-svg:nth-child(2n)  { animation-delay: 0.7s; }
+  .eye-svg:nth-child(3n)  { animation-delay: 1.4s; }
+  .eye-svg:nth-child(4n)  { animation-delay: 0.3s; }
+  .eye-svg:nth-child(5n)  { animation-delay: 2.1s; }
+  .eye-svg:nth-child(6n)  { animation-delay: 1.0s; }
+
+  @keyframes eyeblink {
+    0%,88%,100% { transform: scaleY(1); }
+    94%          { transform: scaleY(0.06); }
+  }
+
   /* ─── ASCII ART ─── */
   .ascii-wrap {
     position: relative;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     animation: fadeUp 1.2s ease both;
   }
 
@@ -399,6 +429,121 @@
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠄⠀⠀⢹⡥⣌⠟⠛⠁⡜⣿⠀⢰⢎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠆⠀⠀⠀⠙⠾⣦⠶⣦⢞⡁⠀⠈⠸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
     </div>
+  </div>
+
+  <div class="eyes-band" aria-hidden="true">
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
+    <svg class="eye-svg" width="72" height="40" viewBox="0 0 72 40" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="20" rx="33" ry="16" fill="none" stroke="#e03030" stroke-width="1.5"/>
+  <ellipse cx="36" cy="26" rx="10" ry="10" fill="#e03030" opacity="0.15"/>
+  <circle  cx="36" cy="26" r="8"   fill="#8b1a1a"/>
+  <circle  cx="36" cy="26" r="4"   fill="#e03030"/>
+  <circle  cx="39" cy="23" r="1.5" fill="#ff6060" opacity="0.8"/>
+</svg>
   </div>
 
   <div class="hero-text">

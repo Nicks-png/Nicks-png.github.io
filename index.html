@@ -4,442 +4,388 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Nicks · Nicolas Dias</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg:       #0e0e10;
-    --surface:  #161619;
-    --card:     #1c1c20;
-    --border:   #2a2a30;
-    --red:      #e03030;
-    --red-dim:  #8b1a1a;
-    --red-glow: rgba(224,48,48,0.18);
-    --purple:   #7c3aed;
-    --purple-l: #a855f7;
-    --text:     #e8e6f0;
-    --muted:    #7a7880;
-    --mono:     'JetBrains Mono', monospace;
-    --display:  'Syne', sans-serif;
-  }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:      #0e0e10;
+  --surface: #161619;
+  --card:    #1c1c20;
+  --border:  #2a2a30;
+  --red:     #e03030;
+  --red-dim: #8b1a1a;
+  --red-glow:rgba(224,48,48,0.15);
+  --purple:  #7c3aed;
+  --purple-l:#a855f7;
+  --text:    #e8e6f0;
+  --muted:   #7a7880;
+  --mono:    'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  overflow-x: hidden;
+  cursor: none;
+}
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+/* ── CURSOR ── */
+#cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s ease;
+  mix-blend-mode: normal;
+}
+#cursor svg { display:block; }
+body:active #cursor svg { transform: scale(0.85); }
 
-  html { scroll-behavior: smooth; }
+/* ── SCANLINES ── */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);
+  pointer-events:none;
+  z-index:9998;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ── HERO ── */
+.hero {
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background: radial-gradient(ellipse 70% 55% at 50% 45%, #1c0808 0%, #0e0e10 70%);
+}
 
-  /* ─── SCANLINE OVERLAY ─── */
-  body::before {
-    content:'';
-    position:fixed; inset:0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events:none;
-    z-index:999;
-  }
+#eyeCanvas {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
 
-  /* ─── HERO ─── */
-  .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 2rem;
-    background: radial-gradient(ellipse 80% 60% at 50% 50%, #1a0808 0%, #0e0e10 70%);
-    overflow: hidden;
-  }
+.hero-content {
+  position:relative;
+  z-index:2;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1.4rem;
+  animation: heroIn 1.4s cubic-bezier(.16,1,.3,1) both;
+}
 
-  .hero::after {
-    content:'';
-    position:absolute; inset:0;
-    background: radial-gradient(circle at 50% 50%, var(--red-glow) 0%, transparent 65%);
-    pointer-events:none;
-  }
+@keyframes heroIn {
+  from { opacity:0; transform:translateY(32px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
-  /* ─── OLHOS ─── */
-  .ascii-wrap {
-    position: relative;
-    margin-bottom: 2.5rem;
-    animation: fadeUp 1.2s ease both;
-    z-index: 2;
-  }
+.hero-greeting {
+  font-family: var(--display);
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text);
+}
+.hero-greeting span {
+  color: var(--red);
+  position: relative;
+}
+.hero-greeting span::after {
+  content:'';
+  position:absolute;
+  left:0; bottom:-4px;
+  width:100%; height:2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: underlineIn 0.8s 1.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes underlineIn { to { transform:scaleX(1); } }
 
-  .ascii-art {
-    font-family: var(--mono);
-    font-size: clamp(5px, 0.9vw, 9px);
-    line-height: 1.15;
-    letter-spacing: 0.04em;
-    color: var(--red);
-    text-shadow: 0 0 6px var(--red), 0 0 18px var(--red-dim);
-    white-space: pre;
-    user-select: none;
-    display: block;
-    transition: transform 0.08s ease-out;
-  }
+.hero-sub {
+  font-family: var(--mono);
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  color: var(--muted);
+  letter-spacing: 0.12em;
+}
+.hero-sub em { color: var(--purple-l); font-style:normal; }
 
-  /* olhos laterais */
-  .side-eye {
-    position: fixed;
-    font-size: clamp(3px, 0.55vw, 6px);
-    line-height: 1.1;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 10;
-    animation: sideFade 7s ease-in-out infinite;
-    transition: transform 0.1s ease-out;
-  }
+.cursor-blink {
+  display:inline-block;
+  width:2px; height:1em;
+  background:var(--red);
+  vertical-align:middle;
+  margin-left:3px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50%{opacity:0;} }
 
-  .sl1 { top: 18%; left:  0px; animation-delay: 0s;   }
-  .sl2 { top: 58%; left:  0px; animation-delay: 3.5s; }
-  .sr1 { top: 22%; right: 0px; animation-delay: 1.8s; }
-  .sr2 { top: 62%; right: 0px; animation-delay: 5.2s; }
+.badges {
+  display:flex;
+  gap:0.5rem;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.badge {
+  font-family:var(--mono);
+  font-size:0.68rem;
+  padding:0.25rem 0.75rem;
+  border:1px solid var(--border);
+  border-radius:2px;
+  background:var(--surface);
+  color:var(--muted);
+  letter-spacing:0.08em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.badge:hover { border-color:var(--red-dim); color:var(--red); }
+.badge.red  { border-color:var(--red-dim); color:var(--red); background:rgba(224,48,48,0.06); }
+.badge.purp { border-color:var(--purple);  color:var(--purple-l); background:rgba(124,58,237,0.07); }
 
-  @keyframes sideFade {
-    0%,100% { opacity:0; transform: translateX(-12px); }
-    25%,75%  { opacity:0.4; transform: translateX(0px); }
-  }
+.scroll-hint {
+  position:absolute;
+  bottom:2rem;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.4rem;
+  color:var(--muted);
+  font-size:0.65rem;
+  letter-spacing:0.18em;
+  animation: pulse 2.5s ease infinite;
+  z-index:2;
+}
+.scroll-hint::after {
+  content:'';
+  width:1px;
+  height:44px;
+  background:linear-gradient(to bottom,var(--red),transparent);
+}
+@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.9} }
 
-  .sr1, .sr2 {
-    animation-name: sideFadeR;
-  }
+/* ── MAIN ── */
+main { max-width:980px; margin:0 auto; padding:6rem 2rem; }
+section { margin-bottom:6rem; }
 
-  @keyframes sideFadeR {
-    0%,100% { opacity:0; transform: translateX(12px); }
-    25%,75%  { opacity:0.4; transform: translateX(0px); }
-  }
+.section-label {
+  font-family:var(--mono);
+  font-size:0.65rem;
+  letter-spacing:0.22em;
+  color:var(--red);
+  text-transform:uppercase;
+  margin-bottom:0.4rem;
+}
+.section-title {
+  font-family:var(--display);
+  font-size:clamp(1.4rem,3vw,2rem);
+  font-weight:800;
+  color:var(--text);
+  margin-bottom:2.2rem;
+  padding-bottom:0.8rem;
+  border-bottom:1px solid var(--border);
+}
 
-  /* ─── MAIN CONTENT ─── */
-  main { max-width: 960px; margin: 0 auto; padding: 5rem 2rem; }
+/* ── REVEAL ANIMATION ── */
+.reveal {
+  opacity:0;
+  transform:translateY(28px);
+  transition: opacity 0.8s cubic-bezier(.16,1,.3,1), transform 0.8s cubic-bezier(.16,1,.3,1);
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-delay-1 { transition-delay:0.1s; }
+.reveal-delay-2 { transition-delay:0.2s; }
+.reveal-delay-3 { transition-delay:0.3s; }
 
-  /* ─── SECTION HEADER ─── */
-  .section-label {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
+/* ── BIO ── */
+.bio-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+@media(max-width:640px){ .bio-grid{grid-template-columns:1fr;} }
 
-  .section-title {
-    font-family: var(--display);
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.8rem;
-  }
+.bio-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:1.5rem;
+  transition:border-color 0.3s, transform 0.3s;
+}
+.bio-card:hover { border-color:var(--red-dim); transform:translateY(-2px); }
+.bio-card pre {
+  font-family:var(--mono);
+  font-size:0.8rem;
+  line-height:2;
+  color:var(--muted);
+  white-space:pre-wrap;
+}
+.bio-card pre .k { color:var(--purple-l); }
+.bio-card pre .v { color:var(--text); }
+.bio-card pre .s { color:#86efac; }
+.bio-card pre .b { color:var(--red); }
+.bio-desc {
+  font-family:var(--mono);
+  font-size:0.82rem;
+  line-height:1.95;
+  color:var(--muted);
+}
+.bio-desc strong { color:var(--text); }
 
-  section { margin-bottom: 5rem; }
+/* ── TECH ── */
+.tech-grid { display:flex; flex-wrap:wrap; gap:0.55rem; }
+.tech-badge {
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  padding:0.38rem 0.9rem;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-size:0.76rem;
+  color:var(--muted);
+  transition:all 0.22s;
+  cursor:default;
+}
+.tech-badge:hover { border-color:var(--red-dim); color:var(--text); transform:translateY(-2px); background:rgba(224,48,48,0.04); }
+.dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
-  /* ─── BIO ─── */
-  .bio-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
+/* ── STATS ── */
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+@media(max-width:600px){ .stats-grid{grid-template-columns:1fr;} }
+.stats-img {
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:4px;
+  display:block;
+  transition:border-color 0.3s, transform 0.3s;
+  pointer-events:none;
+}
+.stats-img:hover { border-color:var(--red-dim); transform:translateY(-2px); }
+.stats-full { grid-column:1/-1; }
 
-  @media(max-width:640px){ .bio-grid { grid-template-columns:1fr; } }
+/* ── NAVBAR ── */
+nav {
+  position:fixed;
+  top:0; left:0; right:0;
+  z-index:100;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem 2.5rem;
+  background:rgba(14,14,16,0.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;
+  transition:border-color 0.3s;
+}
+nav.scrolled { border-color:var(--border); }
+.nav-logo {
+  font-family:var(--display);
+  font-weight:800;
+  font-size:1.1rem;
+  color:var(--red);
+  letter-spacing:-0.02em;
+  text-decoration:none;
+}
+.nav-links { display:flex; gap:2rem; list-style:none; }
+.nav-links a {
+  font-family:var(--mono);
+  font-size:0.72rem;
+  color:var(--muted);
+  text-decoration:none;
+  letter-spacing:0.1em;
+  transition:color 0.2s;
+}
+.nav-links a:hover { color:var(--red); }
 
-  .bio-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1.5rem;
-    transition: border-color 0.3s;
-  }
-
-  .bio-card:hover { border-color: var(--red-dim); }
-
-  .bio-card pre {
-    font-family: var(--mono);
-    font-size: 0.82rem;
-    line-height: 1.9;
-    color: var(--muted);
-    white-space: pre-wrap;
-  }
-
-  .bio-card pre .key   { color: var(--purple-l); }
-  .bio-card pre .val   { color: var(--text); }
-  .bio-card pre .str   { color: #86efac; }
-  .bio-card pre .bool  { color: var(--red); }
-
-  .bio-desc {
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    line-height: 1.9;
-    color: var(--muted);
-  }
-
-  .bio-desc strong { color: var(--text); }
-
-  /* ─── TECH STACK ─── */
-  .tech-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-
-  .tech-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.9rem;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-family: var(--mono);
-    transition: all 0.25s;
-    cursor: default;
-  }
-
-  .tech-badge:hover {
-    border-color: var(--red-dim);
-    color: var(--text);
-    background: rgba(224,48,48,0.05);
-    transform: translateY(-2px);
-  }
-
-  .tech-badge .dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* ─── STATS ─── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-
-  @media(max-width:640px){ .stats-grid { grid-template-columns:1fr; } }
-
-  .stats-img {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    display: block;
-    transition: border-color 0.3s;
-  }
-
-  .stats-img:hover { border-color: var(--red-dim); }
-
-  .stats-full {
-    grid-column: 1 / -1;
-  }
-
-  /* ─── FOOTER ─── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem;
-    text-align: center;
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-
-  footer span { color: var(--red); }
-
-  /* ─── ANIMATIONS ─── */
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(24px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-
-  .reveal {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ── FOOTER ── */
+footer {
+  border-top:1px solid var(--border);
+  padding:2.5rem 2rem;
+  text-align:center;
+  font-size:0.7rem;
+  color:var(--muted);
+  letter-spacing:0.1em;
+}
+footer span { color:var(--red); }
 </style>
 </head>
 <body>
 
-<!-- ─── HERO ─── -->
+<!-- CURSOR -->
+<div id="cursor">
+  <svg width="28" height="20" viewBox="0 0 28 20">
+    <ellipse cx="14" cy="10" rx="13" ry="9" fill="#0e0e10" stroke="#e03030" stroke-width="1.2"/>
+    <ellipse cx="14" cy="10" rx="6" ry="6" fill="#8b0000"/>
+    <circle  cx="14" cy="10" r="3.2" fill="#1a0000"/>
+    <circle  cx="11.5" cy="7.5" r="1.2" fill="rgba(255,180,180,0.6)"/>
+  </svg>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" class="nav-logo">Nicks</a>
+  <ul class="nav-links">
+    <li><a href="#about">// sobre</a></li>
+    <li><a href="#tech">// tech</a></li>
+    <li><a href="#stats">// stats</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
 <section class="hero" id="hero">
-
-  <div class="ascii-wrap">
-    <pre class="ascii-art" id="eyeMain">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢶⠼⢻⣷⣦⡀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡈⢃⠐⣏⣟⣸⢣⡆⠀⠀⠀⠐⠳⠃⠉⣥⣆⣠⣠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡷⠤⣬⠍⠉⠁⠆⠀⠀⠀⠨⢼⡄⠜⢿⣭⡼⠋⡦⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠋⠲⠆⠘⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣼⣿⣼⣿⣿⣤⣤⣀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⠶⠖⠶⣶⣄⣄⡀⠀⠀⢺⡿⠟⠛⠋⠉⡻⣿⣿⣿⣿⡆
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢴⣿⡯⠿⠽⢆⠠⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡾⠃⢰⣿⣷⠌⡿⢻⡃⠀⠀⢋⠀⠀⠀⠀⢰⣼⣤⣽⣿⡯⡇
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣟⢠⢾⣶⡄⢹⠼⢦⠀⠀⠀⠀⠀⠀⠀⠿⠒⡓⠊⠉⠁⡀⣴⡛⠋⠀⢀⠆⠀⠀⠀⠀⢸⣿⣿⣿⣛⣡⣧
-⠀⠀⠀⠀⢀⢠⣠⣠⠀⡀⠀⠀⠀⢻⣌⠋⠛⠚⢁⡡⠊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠋⠁⠁⠀⠀⠀⠠⣞⠠⣀⠀⠀⠀⠙⢿⣿⣿⣿⡇
-⠀⢠⡴⣿⣿⡿⡄⠹⡑⡕⠀⠀⠀⠀⠛⠛⠒⠋⢉⣦⣦⣞⡢⢄⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⡇⠂⠠⠀⡤⠒⠂⠒⠂⠘
-⠈⢭⡣⠳⢯⡵⠃⢠⠱⠼⠀⠀⠀⠀⠀⠀⠀⢠⡿⢹⣝⣻⠇⢸⢱⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀
-⠀⠀⠉⠳⠜⠆⠁⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠚⠪⠅⠤⠘⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⠝⢉⣡⣬⡐⠺⡂
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⠀⠠⠄⠤⢦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⣕⣀⢺⣟⣛⣷⣴⠈
-⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠬⠀⢠⣾⡯⣷⠀⡳⡔⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠛⠉⠈⠀⠀
-⠀⠀⠀⠾⣷⣾⠿⣛⣶⣟⡷⠦⣄⣠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠺⣻⣛⠛⠍⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠰⠰⣅⠀⣼⣟⣿⣿⠿⡆⠈⡹⣷⡞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⣥⣈⠁⠙⢬⣌⣭⡾⠃⠀⢹⣦⠷⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠧⠉⠛⠢⣄⣤⣠⡀⣠⣤⠤⠒⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣬⠿⠛⢉⣉⣛⡻⢮⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠾⢷⡁⠀⢰⡿⢫⣿⣿⡆⠈⢻⣷⡄⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⣀⡀⠀⣄⢠⡀⡀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠀⡉⠂⠘⢯⣼⣷⡿⠃⢀⠞⡙⠁⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣦⣼⡖⠓⣼⣼⢠⣤⡄⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⣵⣤⢠⠀⠀⢠⣤⠚⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣬⣿⠅⠀⠀⢀⠔⠚⣶⣾⡽⣞⣤⠠⡀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠁⠀⠀⠀⣼⡿⣷⣾⣷⣆⠰⣿⡷⡀⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠄⠀⠀⢹⡥⣌⠟⠛⠁⡜⣿⠀⢰⢎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠆⠀⠀⠀⠙⠾⣦⠶⣦⢞⡁⠀⠈⠸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
+  <canvas id="eyeCanvas"></canvas>
+  <div class="hero-content">
+    <h1 class="hero-greeting">Hi, I'm <span>Nicks</span></h1>
+    <p class="hero-sub">An <em>ADS Student</em> in the making<span class="cursor-blink"></span></p>
+    <div class="badges">
+      <span class="badge red">👁 sempre observando</span>
+      <span class="badge">🇧🇷 Brasil</span>
+      <span class="badge purp">Análise e Dev de Software</span>
+      <span class="badge">status: building</span>
+    </div>
   </div>
-
-  <pre class="ascii-art side-eye sl1" id="sl1">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-  <pre class="ascii-art side-eye sl2" id="sl2">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-  <pre class="ascii-art side-eye sr1" id="sr1">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-  <pre class="ascii-art side-eye sr2" id="sr2">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-
-  <div class="hero-text">
-    <h1 class="hero-greeting">Hi, I'm <span>Nicks</span> 👁️</h1>
-    <p class="hero-sub">An <em>ADS Student</em> in the making<span class="cursor"></span></p>
-  </div>
-
-  <div class="badges">
-    <span class="badge red">👁️ sempre observando</span>
-    <span class="badge">🇧🇷 Brasil</span>
-    <span class="badge purp">ADS · Análise e Dev de Software</span>
-    <span class="badge">status: building</span>
-  </div>
-
   <div class="scroll-hint">scroll</div>
 </section>
 
-<!-- ─── MAIN ─── -->
+<!-- MAIN -->
 <main>
 
-  <!-- BIO -->
-  <section class="reveal">
-    <p class="section-label">// 001</p>
-    <h2 class="section-title">sobre mim</h2>
+  <section id="about">
+    <div class="reveal">
+      <p class="section-label">// 001</p>
+      <h2 class="section-title">sobre mim</h2>
+    </div>
     <div class="bio-grid">
-      <div class="bio-card">
-        <pre><span class="key">nome   </span>: <span class="val">Nicolas Dias</span>
-<span class="key">alias  </span>: <span class="val">Nicks</span>
-<span class="key">curso  </span>: <span class="str">"Análise e Desenvolvimento de Software"</span>
-<span class="key">base   </span>: <span class="str">"Brasil 🇧🇷"</span>
-<span class="key">foco   </span>: <span class="str">"aprender · construir · melhorar"</span>
-<span class="key">café   </span>: <span class="bool">true</span>
-<span class="key">bugs   </span>: <span class="str">"também são features"</span></pre>
+      <div class="bio-card reveal reveal-delay-1">
+        <pre><span class="k">nome   </span>: <span class="v">Nicolas Dias</span>
+<span class="k">alias  </span>: <span class="v">Nicks</span>
+<span class="k">curso  </span>: <span class="s">"ADS"</span>
+<span class="k">base   </span>: <span class="s">"Brasil 🇧🇷"</span>
+<span class="k">foco   </span>: <span class="s">"aprender · construir"</span>
+<span class="k">café   </span>: <span class="b">true</span>
+<span class="k">bugs   </span>: <span class="s">"também são features"</span></pre>
       </div>
-      <div class="bio-card">
+      <div class="bio-card reveal reveal-delay-2">
         <p class="bio-desc">
-          Sou um estudante de <strong>Análise e Desenvolvimento de Software</strong>, apaixonado por tecnologia e sempre em busca de novos desafios. Gosto de explorar novas tecnologias e usá-las para resolver problemas reais 💡.<br/><br/>
-          Atualmente estou construindo minha base em programação e desenvolvimento de sistemas — com foco em evoluir todos os dias. Acredito que cada linha de código é um passo a mais no caminho. 🚀
+          Estudante de <strong>Análise e Desenvolvimento de Software</strong>, apaixonado por tecnologia e sempre em busca de novos desafios.<br/><br/>
+          Gosto de explorar ferramentas novas e usá-las para resolver problemas reais. Atualmente construindo minha base em programação com foco em evoluir todos os dias. 🚀
         </p>
       </div>
     </div>
   </section>
 
-  <!-- TECH -->
-  <section class="reveal">
-    <p class="section-label">// 002</p>
-    <h2 class="section-title">technology stack 🛠️</h2>
-    <div class="tech-grid">
+  <section id="tech">
+    <div class="reveal">
+      <p class="section-label">// 002</p>
+      <h2 class="section-title">technology stack</h2>
+    </div>
+    <div class="tech-grid reveal reveal-delay-1">
       <div class="tech-badge"><span class="dot" style="background:#e34f26"></span>HTML5</div>
       <div class="tech-badge"><span class="dot" style="background:#1572b6"></span>CSS3</div>
       <div class="tech-badge"><span class="dot" style="background:#f7df1e"></span>JavaScript</div>
@@ -453,64 +399,233 @@
     </div>
   </section>
 
-  <!-- STATS -->
-  <section class="reveal">
-    <p class="section-label">// 003</p>
-    <h2 class="section-title">my github stats 📊</h2>
-    <div class="stats-grid">
-      <img class="stats-img" src="https://github-readme-stats.vercel.app/api?username=Nicks-png&show_icons=true&bg_color=161619&title_color=e03030&icon_color=e03030&text_color=e8e6f0&border_color=2a2a30&border_radius=4&include_all_commits=true&count_private=true" alt="GitHub Stats"/>
-      <img class="stats-img" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Nicks-png&layout=compact&bg_color=161619&title_color=e03030&text_color=e8e6f0&border_color=2a2a30&border_radius=4" alt="Top Langs"/>
-      <img class="stats-img stats-full" src="https://github-readme-streak-stats.herokuapp.com/?user=Nicks-png&background=161619&border=2a2a30&stroke=2a2a30&ring=e03030&fire=e03030&currStreakNum=f3e8ff&sideNums=e8e6f0&currStreakLabel=e03030&sideLabels=7a7880&dates=2a2a30&border_radius=4" alt="Streak"/>
+  <section id="stats">
+    <div class="reveal">
+      <p class="section-label">// 003</p>
+      <h2 class="section-title">github stats</h2>
     </div>
-  </section>
-
-  <!-- GRAPH -->
-  <section class="reveal">
-    <p class="section-label">// 004</p>
-    <h2 class="section-title">contribution graph 📈</h2>
-    <img class="stats-img" style="width:100%" src="https://github-readme-activity-graph.vercel.app/graph?username=Nicks-png&bg_color=161619&color=e03030&line=8b1a1a&point=e03030&area=true&area_color=1a0505&hide_border=false&border_color=2a2a30&radius=4&custom_title=Nicks+Contribution+Graph" alt="Activity Graph"/>
+    <div class="stats-grid">
+      <img class="stats-img reveal reveal-delay-1" src="https://github-readme-stats.vercel.app/api?username=Nicks-png&show_icons=true&bg_color=0d0d0f&title_color=e03030&icon_color=e03030&text_color=e8e6f0&border_color=2a2a30&border_radius=4&include_all_commits=true&count_private=true"/>
+      <img class="stats-img reveal reveal-delay-2" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Nicks-png&layout=donut&bg_color=0d0d0f&title_color=e03030&text_color=e8e6f0&border_color=2a2a30&border_radius=4"/>
+      <img class="stats-img stats-full reveal reveal-delay-3" src="https://github-readme-streak-stats.herokuapp.com/?user=Nicks-png&background=0d0d0f&border=2a2a30&stroke=2a2a30&ring=e03030&fire=e03030&currStreakNum=e8e6f0&sideNums=e8e6f0&currStreakLabel=e03030&sideLabels=7a7880&dates=3a3a40&border_radius=4"/>
+    </div>
   </section>
 
 </main>
 
-<!-- FOOTER -->
 <footer>
-  <span>👁️</span> Nicolas Dias · Nicks · ADS · Brasil 🇧🇷 <span>👁️</span>
+  <span>👁</span> Nicolas Dias · Nicks · ADS · Brasil 🇧🇷 <span>👁</span>
   <br/><br/>
   <span style="color:var(--border)">always watching · always learning</span>
 </footer>
 
 <script>
-  // reveal on scroll
-  const reveals = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.1 });
-  reveals.forEach(r => io.observe(r));
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+let cx = window.innerWidth/2, cy = window.innerHeight/2;
+let tx = cx, ty = cy;
+document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+(function animCursor(){
+  cx += (tx - cx) * 0.18;
+  cy += (ty - cy) * 0.18;
+  cursor.style.left = cx + 'px';
+  cursor.style.top  = cy + 'px';
+  requestAnimationFrame(animCursor);
+})();
 
-  // todos os olhos seguem o mouse
-  const allEyes = document.querySelectorAll('.ascii-art');
+// ── NAV SCROLL ──
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+});
 
-  document.addEventListener('mousemove', e => {
-    const cx = window.innerWidth  / 2;
-    const cy = window.innerHeight / 2;
-    const dx = (e.clientX - cx) / cx;
-    const dy = (e.clientY - cy) / cy;
+// ── REVEAL ON SCROLL ──
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+revealEls.forEach(r => io.observe(r));
 
-    allEyes.forEach((el, i) => {
-      const depth = 0.5 + (i * 0.15);
-      const isSide = el.classList.contains('side-eye');
-      const mx = dx * (isSide ? 8 : 14) * depth;
-      const my = dy * (isSide ? 5 : 10) * depth;
-      // preserva animação de fade nos laterais
-      if (isSide) {
-        el.style.marginLeft = mx + 'px';
-        el.style.marginTop  = my + 'px';
-      } else {
-        el.style.transform = `translate(${mx}px, ${my}px)`;
-      }
-    });
-  });
+// ── EYES CANVAS ──
+const canvas = document.getElementById('eyeCanvas');
+const c = canvas.getContext('2d');
+let W, H, mx = 0, my = 0, blinkT = 0, blinking = false;
+
+function resize() {
+  W = canvas.width  = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+canvas.addEventListener('click', () => { if(!blinking){ blinking=true; blinkT=0; } });
+
+const EYES = [
+  {fx:0.12, fy:0.20, s:1.20},
+  {fx:0.40, fy:0.14, s:0.80},
+  {fx:0.72, fy:0.22, s:1.40},
+  {fx:0.90, fy:0.10, s:0.60},
+  {fx:0.06, fy:0.65, s:0.70},
+  {fx:0.28, fy:0.72, s:1.00},
+  {fx:0.58, fy:0.65, s:1.20},
+  {fx:0.82, fy:0.74, s:0.80},
+  {fx:0.50, fy:0.40, s:0.65},
+  {fx:0.22, fy:0.44, s:0.55},
+];
+
+function almondPath(ox, oy, rw, rh, tilt) {
+  const t = tilt || 0;
+  c.beginPath();
+  c.moveTo(ox - rw, oy + t);
+  c.bezierCurveTo(ox - rw*0.6, oy - rh*1.2 + t,  ox + rw*0.6, oy - rh*1.2 + t,  ox + rw, oy - t);
+  c.bezierCurveTo(ox + rw*0.6, oy + rh*1.2 - t,  ox - rw*0.6, oy + rh*1.2 - t,  ox - rw, oy + t);
+  c.closePath();
+}
+
+function drawEye(ex, ey, scale, lid) {
+  const rw = 78 * scale * (W / 900);
+  const rh = rw * 0.50;
+  const tilt = rh * 0.07;
+
+  // glow
+  const gl = c.createRadialGradient(ex, ey, rh*0.5, ex, ey, rw*2);
+  gl.addColorStop(0, 'rgba(100,0,0,0.14)');
+  gl.addColorStop(1, 'rgba(0,0,0,0)');
+  c.beginPath();
+  c.ellipse(ex, ey, rw*2, rh*2.4, 0, 0, Math.PI*2);
+  c.fillStyle = gl;
+  c.fill();
+
+  // shadow
+  c.save();
+  c.translate(3, 6);
+  almondPath(ex, ey, rw, rh, tilt);
+  c.fillStyle = 'rgba(0,0,0,0.55)';
+  c.fill();
+  c.restore();
+
+  // clip
+  c.save();
+  almondPath(ex, ey, rw, rh, tilt);
+  c.clip();
+
+  // sclera
+  const sg = c.createRadialGradient(ex, ey, 0, ex, ey, rw);
+  sg.addColorStop(0,   '#cec4bc');
+  sg.addColorStop(0.6, '#b0a49c');
+  sg.addColorStop(1,   '#7a6860');
+  almondPath(ex, ey, rw, rh, tilt);
+  c.fillStyle = sg;
+  c.fill();
+
+  // corner redness
+  c.beginPath();
+  c.ellipse(ex - rw*0.76, ey, rw*0.28, rh*0.45, 0, 0, Math.PI*2);
+  c.fillStyle = 'rgba(160,25,25,0.38)';
+  c.fill();
+  c.beginPath();
+  c.ellipse(ex + rw*0.76, ey, rw*0.28, rh*0.45, 0, 0, Math.PI*2);
+  c.fillStyle = 'rgba(160,25,25,0.38)';
+  c.fill();
+
+  // veins
+  for(let i=0;i<7;i++){
+    const ang = (i/7)*Math.PI*2 + i*0.15;
+    const len = rw*(0.3+0.18*(i%3));
+    c.beginPath();
+    c.moveTo(ex - rw*0.5*(i%2?1:-1), ey);
+    c.quadraticCurveTo(ex + Math.cos(ang)*len*0.5, ey + Math.sin(ang)*len*0.35,
+                       ex + Math.cos(ang)*len,      ey + Math.sin(ang)*len*0.32);
+    c.strokeStyle = `rgba(170,15,15,${0.10+i*0.03})`;
+    c.lineWidth = 0.65;
+    c.stroke();
+  }
+
+  // pupil tracking
+  const ddx = mx - ex, ddy = my - ey;
+  const ang  = Math.atan2(ddy, ddx);
+  const dist = Math.sqrt(ddx*ddx + ddy*ddy);
+  const sh   = Math.min(dist*0.05, rw*0.24);
+  const px   = ex + Math.cos(ang)*sh;
+  const py   = ey + Math.sin(ang)*sh*0.5;
+  const pr   = rh*0.76;
+
+  // iris
+  const ig = c.createRadialGradient(px - pr*0.2, py - pr*0.2, 0, px, py, pr);
+  ig.addColorStop(0,   '#9b0000');
+  ig.addColorStop(0.5, '#660000');
+  ig.addColorStop(0.85,'#3d0000');
+  ig.addColorStop(1,   '#1a0000');
+  c.beginPath();
+  c.arc(px, py, pr, 0, Math.PI*2);
+  c.fillStyle = ig;
+  c.fill();
+
+  // iris rings
+  for(let r=0;r<3;r++){
+    c.beginPath();
+    c.arc(px, py, pr*(0.9 - r*0.18), 0, Math.PI*2);
+    c.strokeStyle = `rgba(140,0,0,${0.18+r*0.07})`;
+    c.lineWidth = 0.8;
+    c.stroke();
+  }
+
+  // pupil
+  c.beginPath();
+  c.arc(px, py, pr*0.44, 0, Math.PI*2);
+  c.fillStyle = '#050000';
+  c.fill();
+
+  // highlight
+  c.beginPath();
+  c.arc(px - pr*0.2, py - pr*0.22, pr*0.13, 0, Math.PI*2);
+  c.fillStyle = 'rgba(255,200,200,0.52)';
+  c.fill();
+
+  // blink cover
+  if(lid > 0){
+    almondPath(ex, ey, rw*1.05, rh*1.05, tilt);
+    c.fillStyle = '#0e0e10';
+    c.fill();
+    c.beginPath();
+    c.rect(ex-rw-4, ey-rh*1.5-4, rw*2+8, (rh*3+8)*lid);
+    c.fillStyle = '#0e0e10';
+    c.fill();
+  }
+
+  c.restore();
+
+  // outline
+  almondPath(ex, ey, rw, rh, tilt);
+  c.strokeStyle = '#1a0505';
+  c.lineWidth = 2;
+  c.stroke();
+
+  // upper lash
+  c.beginPath();
+  c.moveTo(ex - rw, ey + tilt);
+  c.bezierCurveTo(ex - rw*0.6, ey - rh*1.2 + tilt, ex + rw*0.6, ey - rh*1.2 + tilt, ex + rw, ey - tilt);
+  c.strokeStyle = '#0d0202';
+  c.lineWidth = 3.2;
+  c.stroke();
+
+  // tear duct
+  c.beginPath();
+  c.arc(ex - rw*0.88, ey + tilt*0.5, rw*0.055, 0, Math.PI*2);
+  c.fillStyle = 'rgba(180,60,60,0.5)';
+  c.fill();
+}
+
+function frame(){
+  c.clearRect(0, 0, W, H);
+
+  if(blinking){ blinkT += 0.09; if(blinkT >= 2){ blinking=false; blinkT=0; } }
+  const lid = blinkT <= 1 ? blinkT : 2 - blinkT;
+
+  EYES.forEach(e => drawEye(e.fx*W, e.fy*H, e.s, lid));
+  requestAnimationFrame(frame);
+}
+frame();
 </script>
 </body>
 </html>

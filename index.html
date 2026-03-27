@@ -9,7 +9,7 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#0e0e10;--surface:#161619;--card:#1c1c20;--border:#2a2a30;
-  --red:#e03030;--red-dim:#8b1a1a;
+  --red:#e03030;--red-dim:#8b1a1a;--red-glow:rgba(224,48,48,0.12);
   --purple:#7c3aed;--purple-l:#a855f7;
   --text:#e8e6f0;--muted:#7a7880;
   --mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif;
@@ -17,104 +17,163 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);overflow-x:hidden;cursor:none;}
 
-/* ── CURSOR: pixel hand ── */
+/* ── CURSOR PIXEL HAND ── */
 #cur{
   position:fixed;pointer-events:none;z-index:9999;
-  width:32px;height:32px;
-  transform:translate(0,-2px);
+  width:28px;height:36px;
+  transform:translate(0,0);
   image-rendering:pixelated;
+  transition:transform 0.06s ease;
+  will-change:transform;
 }
+#cur.clicking{transform:scale(0.88) translate(2px,2px);}
 
 /* ── SCANLINES ── */
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.022) 2px,rgba(0,0,0,0.022) 4px);pointer-events:none;z-index:9990;}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px);
+  pointer-events:none;z-index:9990;
+}
 
 /* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:1rem 2.5rem;background:rgba(14,14,16,0);border-bottom:1px solid transparent;transition:background 0.4s,backdrop-filter 0.4s,border-color 0.4s;}
-nav.scrolled{background:rgba(14,14,16,0.88);backdrop-filter:blur(14px);border-color:var(--border);}
-.nav-logo{font-family:var(--display);font-weight:800;font-size:1.1rem;color:var(--red);text-decoration:none;}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.1rem 2.5rem;
+  background:rgba(14,14,16,0);
+  border-bottom:1px solid transparent;
+  transition:background 0.5s,backdrop-filter 0.5s,border-color 0.5s;
+}
+nav.scrolled{background:rgba(14,14,16,0.9);backdrop-filter:blur(16px);border-color:var(--border);}
+.nav-logo{
+  font-family:var(--display);font-weight:800;font-size:1.1rem;
+  color:var(--red);text-decoration:none;letter-spacing:-0.02em;
+  position:relative;
+}
+.nav-logo::after{
+  content:'';position:absolute;left:0;bottom:-2px;
+  width:0;height:1px;background:var(--red);
+  transition:width 0.3s ease;
+}
+.nav-logo:hover::after{width:100%;}
 .nav-links{display:flex;gap:2rem;list-style:none;}
-.nav-links a{font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:0.1em;transition:color 0.2s;}
+.nav-links a{
+  font-size:0.7rem;color:var(--muted);text-decoration:none;
+  letter-spacing:0.1em;transition:color 0.2s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;left:0;bottom:-2px;
+  width:0;height:1px;background:var(--red);
+  transition:width 0.25s ease;
+}
 .nav-links a:hover{color:var(--red);}
+.nav-links a:hover::after{width:100%;}
 
 /* ── HERO ── */
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse 70% 55% at 50% 45%,#1c0808 0%,#0e0e10 68%);}
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 70% 55% at 50% 45%,#1c0808 0%,#0e0e10 68%);
+}
+
+/* ── EYE SVG CANVAS ── */
+#eyeSvg{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:1;
+}
 
 /* ── ASCII CENTRAL ── */
-.ascii-center{position:relative;z-index:2;margin-bottom:2.6rem;animation:fadeUp 1.2s cubic-bezier(.16,1,.3,1) both;}
-.ascii-center pre{font-family:var(--mono);font-size:clamp(5px,0.92vw,9.5px);line-height:1.14;letter-spacing:0.04em;color:var(--red);text-shadow:0 0 6px var(--red),0 0 18px var(--red-dim);white-space:pre;user-select:none;}
-
-/* ── OLHOS LATERAIS com piscar CSS ── */
-.side-eye{
-  position:fixed;font-family:var(--mono);
-  font-size:clamp(2.8px,0.44vw,5px);
-  line-height:1.1;letter-spacing:0.03em;
-  color:var(--red);text-shadow:0 0 5px var(--red),0 0 12px var(--red-dim);
-  white-space:pre;user-select:none;pointer-events:none;z-index:100;
-  opacity:0;
+.ascii-center{
+  position:relative;z-index:2;
+  margin-bottom:2.6rem;
+  animation:fadeUp 1.2s cubic-bezier(.16,1,.3,1) both;
 }
-.sl1{top:8%; left:0; animation:blinkLeft  12s ease-in-out 0s   infinite;}
-.sl2{top:54%;left:0; animation:blinkLeft  12s ease-in-out 4s   infinite;}
-.sr1{top:14%;right:0;animation:blinkRight 12s ease-in-out 2s   infinite;}
-.sr2{top:60%;right:0;animation:blinkRight 12s ease-in-out 6.5s infinite;}
-
-@keyframes blinkLeft{
-  0%,100%       {opacity:0;  transform:translateX(-10px);}
-  10%           {opacity:0.5;transform:translateX(0);}
-  /* piscar suave no meio */
-  45%           {opacity:0.5;transform:translateX(0);}
-  48%           {opacity:0.08;transform:translateX(0);}
-  51%           {opacity:0.5;transform:translateX(0);}
-  80%           {opacity:0.5;transform:translateX(0);}
-  90%,100%      {opacity:0;  transform:translateX(-10px);}
-}
-@keyframes blinkRight{
-  0%,100%       {opacity:0;  transform:translateX(10px);}
-  10%           {opacity:0.45;transform:translateX(0);}
-  45%           {opacity:0.45;transform:translateX(0);}
-  48%           {opacity:0.06;transform:translateX(0);}
-  51%           {opacity:0.45;transform:translateX(0);}
-  80%           {opacity:0.45;transform:translateX(0);}
-  90%,100%      {opacity:0;  transform:translateX(10px);}
+.ascii-center pre{
+  font-family:var(--mono);
+  font-size:clamp(5px,0.92vw,9.5px);
+  line-height:1.14;letter-spacing:0.04em;
+  color:var(--red);
+  text-shadow:0 0 6px var(--red),0 0 18px var(--red-dim);
+  white-space:pre;user-select:none;
 }
 
 /* ── HERO CONTENT ── */
-.hero-content{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.4rem;animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) 0.1s both;}
+.hero-content{
+  position:relative;z-index:2;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:1.4rem;
+  animation:fadeUp 1.4s cubic-bezier(.16,1,.3,1) 0.1s both;
+}
 @keyframes fadeUp{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
 
-.hero-greeting{font-family:var(--display);font-size:clamp(2.8rem,7vw,5.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--text);}
+.hero-greeting{
+  font-family:var(--display);
+  font-size:clamp(2.8rem,7vw,5.5rem);
+  font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--text);
+}
 .hero-greeting span{color:var(--red);}
 
 .hero-sub{font-size:clamp(0.8rem,1.8vw,0.95rem);color:var(--muted);letter-spacing:0.12em;}
 .hero-sub em{color:var(--purple-l);font-style:normal;}
-.cblink{display:inline-block;width:2px;height:0.9em;background:var(--red);vertical-align:middle;margin-left:3px;animation:blink 1s step-end infinite;}
+.cblink{
+  display:inline-block;width:2px;height:0.9em;
+  background:var(--red);vertical-align:middle;margin-left:3px;
+  animation:blink 1s step-end infinite;
+}
 @keyframes blink{50%{opacity:0;}}
 
 .badges{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;}
-.badge{font-size:0.67rem;padding:0.24rem 0.72rem;border:1px solid var(--border);border-radius:2px;background:var(--surface);color:var(--muted);letter-spacing:0.08em;transition:border-color 0.2s,color 0.2s;}
-.badge:hover{border-color:var(--red-dim);color:var(--red);}
+.badge{
+  font-size:0.67rem;padding:0.24rem 0.72rem;
+  border:1px solid var(--border);border-radius:2px;
+  background:var(--surface);color:var(--muted);
+  letter-spacing:0.08em;
+  transition:border-color 0.2s,color 0.2s,background 0.2s,transform 0.2s;
+}
+.badge:hover{border-color:var(--red-dim);color:var(--red);transform:translateY(-1px);}
 .badge.red{border-color:var(--red-dim);color:var(--red);background:rgba(224,48,48,0.06);}
 .badge.purp{border-color:var(--purple);color:var(--purple-l);background:rgba(124,58,237,0.07);}
 
-.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.4rem;color:var(--muted);font-size:0.64rem;letter-spacing:0.18em;animation:pulse 2.5s ease infinite;z-index:2;}
+.scroll-hint{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:0.4rem;
+  color:var(--muted);font-size:0.64rem;letter-spacing:0.18em;
+  animation:pulse 2.5s ease infinite;z-index:2;
+}
 .scroll-hint::after{content:'';width:1px;height:42px;background:linear-gradient(to bottom,var(--red),transparent);}
 @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.85}}
 
 /* ── MAIN ── */
 main{max-width:980px;margin:0 auto;padding:6rem 2rem;}
 section{margin-bottom:6rem;}
+
 .section-label{font-size:0.64rem;letter-spacing:0.22em;color:var(--red);text-transform:uppercase;margin-bottom:0.4rem;}
-.section-title{font-family:var(--display);font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:var(--text);margin-bottom:2.2rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border);}
+.section-title{
+  font-family:var(--display);font-size:clamp(1.4rem,3vw,2rem);
+  font-weight:800;color:var(--text);margin-bottom:2.2rem;
+  padding-bottom:0.8rem;border-bottom:1px solid var(--border);
+}
 
 /* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.75s cubic-bezier(.16,1,.3,1),transform 0.75s cubic-bezier(.16,1,.3,1);}
+.reveal{
+  opacity:0;transform:translateY(24px);
+  transition:opacity 0.75s cubic-bezier(.16,1,.3,1),transform 0.75s cubic-bezier(.16,1,.3,1);
+}
 .reveal.visible{opacity:1;transform:translateY(0);}
 .d1{transition-delay:0.08s;}.d2{transition-delay:0.16s;}.d3{transition-delay:0.24s;}
 
 /* ── BIO ── */
 .bio-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
 @media(max-width:640px){.bio-grid{grid-template-columns:1fr;}}
-.bio-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.5rem;transition:border-color 0.3s,transform 0.3s;}
-.bio-card:hover{border-color:var(--red-dim);transform:translateY(-2px);}
+.bio-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:4px;padding:1.5rem;
+  transition:border-color 0.3s,transform 0.3s,box-shadow 0.3s;
+}
+.bio-card:hover{
+  border-color:var(--red-dim);transform:translateY(-3px);
+  box-shadow:0 8px 32px rgba(139,26,26,0.15);
+}
 .bio-card pre{font-size:0.79rem;line-height:2;color:var(--muted);white-space:pre-wrap;}
 .k{color:var(--purple-l);}.v{color:var(--text);}.s{color:#86efac;}.b{color:var(--red);}
 .bio-desc{font-size:0.82rem;line-height:1.95;color:var(--muted);}
@@ -122,111 +181,105 @@ section{margin-bottom:6rem;}
 
 /* ── TECH ── */
 .tech-grid{display:flex;flex-wrap:wrap;gap:0.55rem;}
-.tech-badge{display:flex;align-items:center;gap:0.5rem;padding:0.36rem 0.88rem;background:var(--card);border:1px solid var(--border);border-radius:3px;font-size:0.75rem;color:var(--muted);transition:all 0.2s;cursor:default;}
-.tech-badge:hover{border-color:var(--red-dim);color:var(--text);transform:translateY(-2px);background:rgba(224,48,48,0.04);}
+.tech-badge{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.36rem 0.88rem;background:var(--card);
+  border:1px solid var(--border);border-radius:3px;
+  font-size:0.75rem;color:var(--muted);
+  transition:all 0.22s;cursor:default;
+}
+.tech-badge:hover{
+  border-color:var(--red-dim);color:var(--text);
+  transform:translateY(-2px);
+  background:rgba(224,48,48,0.04);
+  box-shadow:0 4px 16px rgba(139,26,26,0.1);
+}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
 /* ── STATS ── */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;}
 @media(max-width:600px){.stats-grid{grid-template-columns:1fr;}}
-.stats-img{width:100%;border:1px solid var(--border);border-radius:4px;display:block;transition:border-color 0.3s,transform 0.3s;pointer-events:none;}
-.stats-img:hover{border-color:var(--red-dim);transform:translateY(-2px);}
+.stats-img{
+  width:100%;border:1px solid var(--border);border-radius:4px;
+  display:block;transition:border-color 0.3s,transform 0.3s,box-shadow 0.3s;
+  pointer-events:none;
+}
+.stats-img:hover{
+  border-color:var(--red-dim);transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(139,26,26,0.12);
+}
 .stats-full{grid-column:1/-1;}
 
 /* ── FOOTER ── */
-footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;}
-footer .accent{color:var(--red);}
+footer{
+  border-top:1px solid var(--border);padding:2.5rem 2rem;
+  text-align:center;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;
+}
+.accent{color:var(--red);}
+
+/* ── PAGE TRANSITION ── */
+.page-loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  transition:opacity 0.6s ease;
+}
+.page-loader.done{opacity:0;}
+.loader-eye{animation:loaderPulse 0.8s ease infinite alternate;}
+@keyframes loaderPulse{from{opacity:0.3}to{opacity:1}}
 </style>
 </head>
 <body>
 
+<!-- PAGE LOADER -->
+<div class="page-loader" id="loader">
+  <svg width="60" height="36" viewBox="0 0 60 36" xmlns="http://www.w3.org/2000/svg" class="loader-eye">
+    <path d="M2 18 C15 2 45 2 58 18 C45 34 15 34 2 18Z" fill="none" stroke="#e03030" stroke-width="1.5"/>
+    <circle cx="30" cy="18" r="9" fill="none" stroke="#e03030" stroke-width="1.5"/>
+    <circle cx="30" cy="18" r="4" fill="#e03030"/>
+  </svg>
+</div>
+
 <!-- CURSOR -->
 <div id="cur">
-<svg width="40" height="52" viewBox="0 0 40 52" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;">
-  <rect x="8" y="0" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="0" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="4" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="4" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="8" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="8" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="8" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="8" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="12" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="12" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="12" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="12" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="12" width="4" height="4" fill="#e03030"/>
-  <rect x="36" y="12" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="36" y="16" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="36" y="20" width="4" height="4" fill="#e03030"/>
-  <rect x="0" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="4" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="36" y="24" width="4" height="4" fill="#e03030"/>
-  <rect x="0" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="4" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="36" y="28" width="4" height="4" fill="#e03030"/>
-  <rect x="0" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="4" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="32" width="4" height="4" fill="#e03030"/>
-  <rect x="0" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="4" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="36" width="4" height="4" fill="#e03030"/>
-  <rect x="0" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="4" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="32" y="40" width="4" height="4" fill="#e03030"/>
-  <rect x="4" y="44" width="4" height="4" fill="#e03030"/>
-  <rect x="8" y="44" width="4" height="4" fill="#e03030"/>
-  <rect x="12" y="44" width="4" height="4" fill="#e03030"/>
-  <rect x="16" y="44" width="4" height="4" fill="#e03030"/>
-  <rect x="20" y="44" width="4" height="4" fill="#e03030"/>
-  <rect x="24" y="44" width="4" height="4" fill="#e03030"/>
-  <rect x="28" y="44" width="4" height="4" fill="#e03030"/>
+<svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;">
+  <!-- pixel hand pointing up, vermelho -->
+  <!-- index finger -->
+  <rect x="10" y="0"  width="4" height="4" fill="#e03030"/>
+  <rect x="10" y="4"  width="4" height="4" fill="#e03030"/>
+  <rect x="10" y="8"  width="4" height="4" fill="#e03030"/>
+  <rect x="10" y="12" width="4" height="4" fill="#e03030"/>
+  <!-- middle finger -->
+  <rect x="14" y="6"  width="4" height="4" fill="#e03030"/>
+  <rect x="14" y="10" width="4" height="4" fill="#e03030"/>
+  <rect x="14" y="14" width="4" height="4" fill="#e03030"/>
+  <!-- ring finger -->
+  <rect x="18" y="8"  width="4" height="4" fill="#e03030"/>
+  <rect x="18" y="12" width="4" height="4" fill="#e03030"/>
+  <rect x="18" y="16" width="4" height="4" fill="#e03030"/>
+  <!-- pinky -->
+  <rect x="22" y="10" width="4" height="4" fill="#e03030"/>
+  <rect x="22" y="14" width="4" height="4" fill="#e03030"/>
+  <rect x="22" y="18" width="4" height="4" fill="#e03030"/>
+  <!-- palm top -->
+  <rect x="6"  y="16" width="4" height="4" fill="#e03030"/>
+  <rect x="10" y="16" width="4" height="4" fill="#e03030"/>
+  <rect x="14" y="18" width="4" height="4" fill="#e03030"/>
+  <rect x="18" y="20" width="4" height="4" fill="#e03030"/>
+  <rect x="22" y="22" width="4" height="4" fill="#e03030"/>
+  <!-- palm body -->
+  <rect x="6"  y="20" width="20" height="4" fill="#e03030"/>
+  <rect x="6"  y="24" width="20" height="4" fill="#e03030"/>
+  <rect x="6"  y="28" width="20" height="4" fill="#e03030"/>
+  <!-- thumb -->
+  <rect x="2"  y="20" width="4" height="4" fill="#e03030"/>
+  <rect x="2"  y="24" width="4" height="4" fill="#e03030"/>
+  <!-- dark outline pixels -->
+  <rect x="8"  y="0"  width="2" height="16" fill="#1a0000"/>
+  <rect x="10" y="0"  width="4" height="2"  fill="#1a0000" opacity="0.4"/>
+  <rect x="4"  y="18" width="2" height="14" fill="#1a0000"/>
+  <rect x="6"  y="32" width="22" height="2" fill="#1a0000"/>
+  <rect x="28" y="16" width="2" height="16" fill="#1a0000"/>
 </svg>
 </div>
 
@@ -240,97 +293,12 @@ footer .accent{color:var(--red);}
   </ul>
 </nav>
 
-<!-- OLHOS LATERAIS -->
-<pre class="side-eye sl1">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-
-<pre class="side-eye sl2">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-
-<pre class="side-eye sr1">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-
-<pre class="side-eye sr2">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⡶⠶⠾⠟⠛⠛⠛⠛⠷⠶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣶⠿⠛⠉⣁⣠⠤⠤⠀⠀⠀⠀⠀⠀⠀⠘⠷⢬⣙⡛⠷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡶⠟⢉⣠⠴⠚⠉⠁⣀⡀⠠⠀⠐⠂⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠦⣍⡻⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠿⢋⡤⠞⢉⣠⡤⠖⢚⣉⣁⣤⣤⣴⣦⣤⣤⣄⣀⣀⠀⠀⠘⠲⢤⡀⠈⠙⠲⣌⡛⢷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⢋⣡⠞⣋⠴⠚⣉⣥⡴⠾⠟⠛⢉⣉⣀⣠⣤⣤⣭⣍⣉⣛⡻⠶⣦⣤⣀⠉⠓⠦⣄⠀⠙⢦⡉⠻⣦⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣀⣴⠟⢁⣴⣫⠷⢛⣡⣴⠟⠋⣁⣤⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠿⠿⣿⣶⣬⣝⡻⢶⣤⡀⠙⠂⢀⠘⠢⡈⠻⣶⣄⠀⠀⠀⠀
-⠀⠀⠀⠀⣠⡾⠛⠁⢠⡿⠛⣡⣶⠟⢋⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⣤⣤⠀⠻⣿⣿⣿⣷⣮⣟⠷⣦⣜⠀⠀⠀⠀⠈⠛⢷⣄⠀⠀
-⠀⢀⣰⡾⠋⠀⠀⠀⢋⣴⠿⢋⣦⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠈⣿⢿⣿⣿⣿⣿⣾⣝⡻⣦⣄⠀⠀⠀⠀⠙⠷⠀
-⣰⡿⠋⠀⠀⠀⣠⡾⢛⣡⣶⡿⠛⣿⣿⣿⣿⠻⣿⠸⣏⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⡇⠀⣿⠈⢻⣿⢿⣿⢿⣿⣿⣷⣭⣀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣤⣾⣯⣴⡿⠛⠋⠀⠀⢹⡼⣿⣿⠀⢿⡀⠉⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⡇⢀⡿⠀⣸⡏⢸⡟⢘⣿⠁⠙⠛⣻⣷⠀⢸⡆⠀⠀
-⠀⠀⠀⠘⣯⣾⡟⢷⡄⠀⠀⠀⠀⠀⠀⠙⢿⣆⠘⣷⡀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⡿⢋⡾⢀⡼⠁⣰⡟⠀⠞⠁⢸⡏⠀⢀⣴⣿⠁⠀⣸⠇⠀⠀
-⠀⠀⣰⣿⢛⣿⡇⠘⠃⠀⠀⠀⠀⠀⠀⠀⠈⠻⣧⣈⠃⠀⠀⠀⠀⠀⠈⠉⠛⠛⠋⠉⠴⠋⣠⠞⢀⣼⠏⠀⠀⠀⠀⡞⢀⣴⣿⣿⠏⠀⠀⠁⠀⠀⠀
-⠀⠀⠙⠛⠛⠛⠿⠿⣷⣦⣄⡐⢦⣀⠀⠀⠀⠀⠈⠛⢷⣦⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢞⣡⣴⠟⠁⠀⠀⠀⢀⣠⣾⣿⣿⠟⡁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢶⣭⣟⡦⣤⣀⡀⠀⠀⠉⠛⠻⠿⠶⣶⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⠀⢀⣠⣶⣿⣿⡿⠋⣠⣾⠇⣠⠀⠀⠀⠀⠀⠀
-⠀⠘⠛⠛⠛⠛⠻⢷⣦⣀⠀⠀⠀⠈⠉⠛⠷⢮⣽⣓⡲⠤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣶⣿⣿⡿⠛⠉⢁⣴⠟⢡⡾⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠸⣄⡈⠛⠿⣶⣤⣄⡀⠀⠀⠀⠀⠉⠙⠛⠿⠷⣶⣦⣤⣤⣤⣤⣴⣶⣶⡿⠿⠿⠟⠛⠋⠁⢀⣠⡾⠛⢁⡴⠋⣠⠆⢀⡴⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣌⡛⠶⣤⣀⠈⠙⠛⠿⢶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⠟⠋⣠⡶⢋⡠⠞⠁⠠⠋⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠷⣍⡛⠳⢶⣭⠅⠀⠀⠀⠀⠀⠈⠉⢛⠛⠿⠷⢶⣶⣦⣤⣤⣤⣤⣤⣤⣴⣶⡾⠟⠛⠉⠀⠀⠚⠡⠖⣋⡤⠖⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠓⠃⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣶⠦⠤⠤⠤⠤⣄⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⣓⣒⡒⠒⠶⠦⠀⢲⣄⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
-
 <!-- HERO -->
 <section class="hero" id="hero">
+
+  <!-- SVG OLHOS ANIMADOS -->
+  <svg id="eyeSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+
   <div class="ascii-center">
     <pre>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢶⠼⢻⣷⣦⡀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡈⢃⠐⣏⣟⣸⢣⡆⠀⠀⠀⠐⠳⠃⠉⣥⣆⣠⣠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -358,6 +326,7 @@ footer .accent{color:var(--red);}
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠄⠀⠀⢹⡥⣌⠟⠛⠁⡜⣿⠀⢰⢎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠆⠀⠀⠀⠙⠾⣦⠶⣦⢞⡁⠀⠈⠸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</pre>
   </div>
+
   <div class="hero-content">
     <h1 class="hero-greeting">Hi, I'm <span>Nicks</span></h1>
     <p class="hero-sub">An <em>ADS Student</em> in the making<span class="cblink"></span></p>
@@ -386,7 +355,7 @@ footer .accent{color:var(--red);}
 <span class="k">bugs   </span>: <span class="s">"também são features"</span></pre>
       </div>
       <div class="bio-card reveal d2">
-        <p class="bio-desc">Estudante de <strong>Análise e Desenvolvimento de Software</strong>, apaixonado por tecnologia e sempre em busca de novos desafios.<br/><br/>Gosto de explorar ferramentas novas e usá-las para resolver problemas reais. Construindo minha base em programação com foco em evoluir todos os dias. 🚀</p>
+        <p class="bio-desc">Estudante de <strong>Análise e Desenvolvimento de Software</strong>, apaixonado por tecnologia e sempre em busca de novos desafios.<br/><br/>Gosto de explorar ferramentas novas e usá-las para resolver problemas reais. Construindo minha base com foco em evoluir todos os dias. 🚀</p>
       </div>
     </div>
   </section>
@@ -423,40 +392,230 @@ footer .accent{color:var(--red);}
 </footer>
 
 <script>
+// ── PAGE LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const l = document.getElementById('loader');
+    l.classList.add('done');
+    setTimeout(() => l.remove(), 600);
+  }, 500);
+});
+
 // ── CURSOR ──
 const cur = document.getElementById('cur');
 let cx = 0, cy = 0, tx = 0, ty = 0;
 document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+document.addEventListener('mousedown', () => cur.classList.add('clicking'));
+document.addEventListener('mouseup', () => cur.classList.remove('clicking'));
 (function loop(){
-  cx += (tx-cx)*0.15; cy += (ty-cy)*0.15;
+  cx += (tx-cx)*0.16; cy += (ty-cy)*0.16;
   cur.style.left = cx+'px'; cur.style.top = cy+'px';
   requestAnimationFrame(loop);
 })();
 
 // ── NAV ──
-window.addEventListener('scroll',()=>{
+window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
-});
+}, {passive:true});
 
 // ── REVEAL ──
-const io = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
-},{threshold:0.12});
-document.querySelectorAll('.reveal').forEach(r=>io.observe(r));
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold:0.12});
+document.querySelectorAll('.reveal').forEach(r => io.observe(r));
 
-// ── OLHOS LATERAIS seguem o mouse via JS ──
-const sideEyes = document.querySelectorAll('.side-eye');
-document.addEventListener('mousemove', e => {
-  const cx2 = window.innerWidth / 2;
-  const cy2 = window.innerHeight / 2;
-  const dx = (e.clientX - cx2) / cx2;
-  const dy = (e.clientY - cy2) / cy2;
-  sideEyes.forEach((el, i) => {
-    const depth = 0.4 + i * 0.08;
-    el.style.marginLeft = (dx * 6 * depth) + 'px';
-    el.style.marginTop  = (dy * 4 * depth) + 'px';
-  });
-});
+// ── SVG EYES IN HERO ──
+(function buildEyes(){
+  const svg = document.getElementById('eyeSvg');
+  const NS = 'http://www.w3.org/2000/svg';
+  let W = 0, H = 0, mx = 0, my = 0;
+
+  const EYES = [
+    {fx:0.10, fy:0.20, rw:0.072, rh:0.044},
+    {fx:0.35, fy:0.13, rw:0.055, rh:0.034},
+    {fx:0.65, fy:0.18, rw:0.080, rh:0.048},
+    {fx:0.88, fy:0.12, rw:0.040, rh:0.025},
+    {fx:0.05, fy:0.65, rw:0.046, rh:0.028},
+    {fx:0.25, fy:0.72, rw:0.062, rh:0.038},
+    {fx:0.60, fy:0.68, rw:0.074, rh:0.045},
+    {fx:0.84, fy:0.74, rw:0.048, rh:0.030},
+    {fx:0.48, fy:0.40, rw:0.042, rh:0.026},
+  ];
+
+  function eyePath(cx, cy, rw, rh) {
+    const t = rh*0.07;
+    return `M${cx-rw},${cy+t} C${cx-rw*0.6},${cy-rh*1.2+t} ${cx+rw*0.6},${cy-rh*1.2+t} ${cx+rw},${cy-t} C${cx+rw*0.6},${cy+rh*1.2-t} ${cx-rw*0.6},${cy+rh*1.2-t} ${cx-rw},${cy+t}Z`;
+  }
+
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for(const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+    return e;
+  }
+
+  function buildEye(eye, idx) {
+    const g = el('g', {class:'eye-group', 'data-idx':idx});
+
+    // clip
+    const clipId = `ec${idx}`;
+    const defs = el('defs', {});
+    const clip = el('clipPath', {id: clipId});
+    const clipP = el('path', {d: eyePath(0,0,1,1)});
+    clip.appendChild(clipP);
+    defs.appendChild(clip);
+    g.appendChild(defs);
+
+    // glow
+    const glow = el('ellipse', {cx:0, cy:0, rx:2, ry:1.5, fill:'#e03030', opacity:'0.08'});
+    g.appendChild(glow);
+
+    // sclera
+    const sclera = el('path', {d: eyePath(0,0,1,1), fill:'none', stroke:'#e03030', 'stroke-width':'0.04', opacity:'0.15'});
+    g.appendChild(sclera);
+
+    // veins group clipped
+    const vg = el('g', {'clip-path':`url(#${clipId})`, stroke:'#e03030', fill:'none', opacity:'0.4'});
+    const veins = [
+      'M-0.7,0 Q-0.85,-0.2 -0.92,-0.35','M-0.7,0 Q-0.82,0.12 -0.88,0.28',
+      'M-0.5,0 Q-0.6,-0.28 -0.62,-0.5','M 0.7,0 Q 0.84,-0.18 0.90,-0.32',
+      'M 0.7,0 Q 0.80, 0.15 0.86, 0.30','M 0.5,0 Q 0.58,-0.26 0.60,-0.48',
+      'M 0,0 Q 0.08,-0.6 0.06,-0.85','M 0,0 Q-0.06,-0.6-0.04,-0.85',
+    ];
+    veins.forEach(d => {
+      vg.appendChild(el('path', {d, 'stroke-width':'0.025'}));
+    });
+    g.appendChild(vg);
+
+    // iris outer
+    g.appendChild(el('circle', {cx:0,cy:0,r:0.56, fill:'none',stroke:'#e03030','stroke-width':'0.05'}));
+    g.appendChild(el('circle', {cx:0,cy:0,r:0.50, fill:'none',stroke:'#e03030','stroke-width':'0.02',opacity:'0.5'}));
+    g.appendChild(el('circle', {cx:0,cy:0,r:0.44, fill:'none',stroke:'#e03030','stroke-width':'0.015',opacity:'0.4'}));
+
+    // iris radial lines
+    const irl = el('g', {stroke:'#e03030','stroke-width':'0.018',opacity:'0.35'});
+    for(let i=0;i<16;i++){
+      const a = (i/16)*Math.PI*2;
+      irl.appendChild(el('line',{x1:0,y1:0,x2:Math.cos(a)*0.54,y2:Math.sin(a)*0.54}));
+    }
+    g.appendChild(irl);
+
+    // pupil
+    const pup = el('g', {class:'pupil'});
+    pup.appendChild(el('circle', {cx:0,cy:0,r:0.28, fill:'none',stroke:'#e03030','stroke-width':'0.06'}));
+    pup.appendChild(el('circle', {cx:0,cy:0,r:0.20, fill:'none',stroke:'#e03030','stroke-width':'0.025',opacity:'0.6'}));
+    g.appendChild(pup);
+
+    // highlight
+    g.appendChild(el('ellipse', {cx:-0.15,cy:-0.18,rx:0.08,ry:0.055,fill:'none',stroke:'#e03030','stroke-width':'0.02',opacity:'0.5'}));
+
+    // upper lid stroke
+    g.appendChild(el('path', {
+      d:`M${-1},${0.07} C${-0.6},${-1.2+0.07} ${0.6},${-1.2+0.07} ${1},${-0.07}`,
+      fill:'none',stroke:'#e03030','stroke-width':'0.10','stroke-linecap':'round'
+    }));
+
+    // lower lid
+    g.appendChild(el('path', {
+      d:`M${-1},${0.07} C${-0.6},${1.2-0.07} ${0.6},${1.2-0.07} ${1},${-0.07}`,
+      fill:'none',stroke:'#e03030','stroke-width':'0.055','stroke-linecap':'round'
+    }));
+
+    // lashes top
+    const lashT = el('g', {stroke:'#e03030','stroke-width':'0.055','stroke-linecap':'round'});
+    [-0.85,-0.65,-0.45,-0.22,0,0.22,0.45,0.65,0.85].forEach(x => {
+      const y0 = -1.15;
+      lashT.appendChild(el('line',{x1:x,y1:y0,x2:x*1.05,y2:y0-0.22}));
+    });
+    g.appendChild(lashT);
+
+    // lashes bottom
+    const lashB = el('g', {stroke:'#e03030','stroke-width':'0.035','stroke-linecap':'round',opacity:'0.65'});
+    [-0.75,-0.45,-0.15,0.15,0.45,0.75].forEach(x => {
+      const y0 = 1.1;
+      lashB.appendChild(el('line',{x1:x,y1:y0,x2:x*1.03,y2:y0+0.14}));
+    });
+    g.appendChild(lashB);
+
+    // blink rect (hidden by default)
+    const blinkR = el('rect', {class:'blink-lid', x:-1.1,y:-1.4,width:2.2,height:0, fill:'#0e0e10'});
+    g.appendChild(blinkR);
+
+    svg.appendChild(g);
+    return g;
+  }
+
+  function resize() {
+    W = svg.clientWidth || window.innerWidth;
+    H = svg.clientHeight || window.innerHeight;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    // reposition eyes
+    document.querySelectorAll('.eye-group').forEach((g, i) => {
+      const e = EYES[i];
+      const cx = e.fx * W, cy = e.fy * H;
+      const rw = e.rw * W, rh = e.rh * H;
+      g.setAttribute('transform', `translate(${cx},${cy}) scale(${rw},${rh})`);
+      // update clip path scale
+      const cp = g.querySelector('path');
+      if(cp) cp.setAttribute('d', eyePath(0,0,1,1));
+      // update glow
+      const glow = g.querySelector('ellipse');
+      if(glow) glow.setAttribute('rx', 2/rw*rw); // keep proportional
+    });
+  }
+
+  // build all eyes
+  EYES.forEach((e, i) => buildEye(e, i));
+  resize();
+  window.addEventListener('resize', resize, {passive:true});
+
+  // mouse tracking
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  // blink animation
+  function blinkEye(g) {
+    const lid = g.querySelector('.blink-lid');
+    if(!lid) return;
+    let t = 0;
+    const dur = 120;
+    function step() {
+      t += 16;
+      const prog = t < dur ? t/dur : (2*dur-t)/dur;
+      lid.setAttribute('height', Math.max(0, prog*2.8));
+      lid.setAttribute('y', -1.4);
+      if(t < dur*2) requestAnimationFrame(step);
+      else lid.setAttribute('height', 0);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // random blink scheduler
+  function scheduleBlink() {
+    const groups = document.querySelectorAll('.eye-group');
+    const g = groups[Math.floor(Math.random()*groups.length)];
+    blinkEye(g);
+    setTimeout(scheduleBlink, 2000 + Math.random()*4000);
+  }
+  setTimeout(scheduleBlink, 1500);
+
+  // animate pupils toward mouse
+  function animateEyes() {
+    document.querySelectorAll('.eye-group').forEach((g, i) => {
+      const e = EYES[i];
+      const cx = e.fx * W, cy = e.fy * H;
+      const rw = e.rw * W;
+      const dx = mx - cx, dy = my - cy;
+      const angle = Math.atan2(dy, dx);
+      const dist = Math.min(Math.sqrt(dx*dx+dy*dy), rw*0.5);
+      const shift = dist / rw * 0.22;
+      const px = Math.cos(angle)*shift;
+      const py = Math.sin(angle)*shift*0.55;
+      const pup = g.querySelector('.pupil');
+      if(pup) pup.setAttribute('transform', `translate(${px},${py})`);
+    });
+    requestAnimationFrame(animateEyes);
+  }
+  animateEyes();
+})();
 </script>
 </body>
 </html>
